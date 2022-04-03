@@ -1,2 +1,1 @@
-# text
-learn
+# The note of computer science learning 
