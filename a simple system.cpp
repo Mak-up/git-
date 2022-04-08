@@ -131,11 +131,12 @@ public:
   void show_now();
   void attend();
   void show_found();
-  void say_();
   void found_();
   void show_attend();
   void delete_();
   void comment();
+  void search();
+  void show_final();
   //~user(void);
 };
 
@@ -185,7 +186,9 @@ void user::get_user()
     cout << "                  ┃ 3 查看你当前创建的活动                            \n";
     cout << "                  ┃ 4 删除活动                          \n";
     cout << "                  ┃ 5 查看你参加的活动                         \n";
-    cout << "                  ┃ 6 返回上一级/退出登录                          \n";
+    cout << "                  ┃ 6 查找活动                         \n";
+    cout << "                  ┃ 7 截止活动详情                         \n";
+    cout << "                  ┃ 8 返回上一级/退出登录                          \n";
     int temp;
     cin >> temp;
     switch (temp)
@@ -215,6 +218,12 @@ void user::get_user()
       goto here;
       break;
     case 6:
+      search();
+      goto here;
+    case 7:
+      show_final();
+      goto here;
+    case 8:
       system("cls");
       break;
     default:
@@ -259,7 +268,7 @@ void user::show_now()
   cout << "请输入您接下来的操作：" << endl;
   cout << "------------------------------------------------------------------------------------------------------------" << endl;
   cout << "┃   1 参与活动           ┃                          \n";
-  //cout << "┃   2 参与评论           ┃                          \n";
+  // cout << "┃   2 参与评论           ┃                          \n";
   cout << "┃   2 返回上一级         ┃                          \n";
   int temp;
   cin >> temp;
@@ -485,7 +494,7 @@ void user::attend()
     }
     in.close(); //关闭文件
 
-    ifstream filein("manage2.txt");         //打开文档
+    ifstream filein("manage2.txt");          //打开文档
     ofstream fileout("user1.txt", ios::out); //打开文档并清空内容
     string s2;
     while (getline(filein, s2)) //将修改后的内容写到文件中去
@@ -542,55 +551,58 @@ void user::show_attend()
     if (in.eof()) //文件尾就结束
       break;
 
-    string s,a1;
-    getline(in, s);       //读入每一行
-    //cout<<s<<endl;
+    string s, a1;
+    getline(in, s); //读入每一行
+    // cout<<s<<endl;
     istringstream sin(s); //定义sin流
-    sin >> name ;
+    sin >> name;
     if (name == name_now) //判断是否存在
     {
       while (sin >> name1)
       {
-       // cout << name1 << endl;
-      ifstream filein("activity.txt");
-      do
-      {
-
-        if (filein.eof())
-          break;
-        string s1;
-        getline(filein, s1);
-        istringstream sin1(s1);
-        string a,b,c,d,e,f;
-        sin1 >> a >> b >> c >> d >> e >> f;
-        if (a == name1)
+        // cout << name1 << endl;
+        ifstream filein("activity.txt");
+        do
         {
-          cout << "活动名称：" << a << "   "
-               << "活动创办人：" << b << "   "
-               << "活动开始时间：" << d << "   "
-               << "活动截止报名时间" << e << "   "
-               << "参与人数:" << f << "/" << c << endl;
-          cout << "************************************************************************************************\n";
-        }
 
-      } while (!filein.eof());
-      filein.close();
-    }
+          if (filein.eof())
+            break;
+          string s1;
+          getline(filein, s1);
+          istringstream sin1(s1);
+          string a, b, c, d, e, f;
+          sin1 >> a >> b >> c >> d >> e >> f;
+          if (a == name1)
+          {
+            cout << "活动名称：" << a << "   "
+                 << "活动创办人：" << b << "   "
+                 << "活动开始时间：" << d << "   "
+                 << "活动截止报名时间" << e << "   "
+                 << "参与人数:" << f << "/" << c << endl;
+            cout << "************************************************************************************************\n";
+          }
+
+        } while (!filein.eof());
+        filein.close();
+      }
     }
   } while (!in.eof());
   in.close();
-  
-  cout<<"请选择接下来的操作：\n";
-  cout<<"|| 1.发表评论"<<endl;
-  cout<<"|| 2.返回上一级"<<endl;
+
+  cout << "请选择接下来的操作：\n";
+  cout << "|| 1.发表评论" << endl;
+  cout << "|| 2.返回上一级" << endl;
   int temp;
-  cin>>temp;
-  switch(temp)
+  cin >> temp;
+  switch (temp)
   {
-  case 1:comment();break;
-  case 2:break;
+  case 1:
+    comment();
+    break;
+  case 2:
+    break;
   default:
-    cout<<"输入有误！"<<endl;
+    cout << "输入有误！" << endl;
     break;
   }
 }
@@ -600,22 +612,145 @@ void user::comment()
   string name;
   cout << "请你输入要选择评论的活动名称：\n";
   cin >> name;
-  cout<<"请发表你的精彩评论！"<<endl;
+  cout << "请发表你的精彩评论！" << endl;
   string comment;
-  cin>>comment;
-  ofstream out("comment.txt",ios::app);
-  out<<endl<<name<<" " <<name_now<<": "<<comment;
-  
-
+  cin >> comment;
+  ofstream out("comment.txt", ios::app);
+  out << endl
+      << name << " " << name_now << ": " << comment;
   return;
 }
 
-class activity
+class transform1
 {
 public:
-  string name;
-  void show_final();
+  vector<int> stringToVecInt(const string &str)
+  {
+    union
+    {
+      char c[2];
+      int i;
+    } convert;
+
+    // 段位清零
+    convert.i = 0;
+
+    vector<int> vec;
+
+    for (unsigned i = 0; i < str.length(); i++)
+    {
+      // GBK编码首字符大于0x80
+      if ((unsigned)str[i] > 0x80)
+      {
+        // 利用union进行转化，注意是大端序
+        convert.c[1] = str[i];
+        convert.c[0] = str[i + 1];
+        vec.push_back(convert.i);
+        i++;
+      }
+      else
+        // 小于0x80，为ASCII编码，一个字节
+        vec.push_back(str[i]);
+    }
+    return vec;
+  }
+  bool include(const std::string &str, const std::string &msg)
+  {
+    auto sour = stringToVecInt(str);
+    auto find = stringToVecInt(msg);
+    return search(sour.begin(), sour.end(), find.begin(), find.end()) != sour.end();
+  }
 };
+//中文是gbk编码.GBK分两段：ASCII段和中文段。ASCII段使用单字节，和ASCII编码保持一致；中文（及特殊符号）段使用双字节编码。在双字节段中，第一字节的范围是81–FE（也就是不含80和FF），第二字节的一部分领域在40–7E，其他领域在80–FE2。
+// 也就是说，在GBK编码中，中文有两个字节，首字节范围81~FE，尾字节范围40~7E。
+// 这么说来，判断一个字符（或者中文的一个字）是否为中文，只要判断其是否大于0x80即可。在判断其大于时，获取两个字节，同时向下跳一字节，进行后续判断；如果不大于，则为ASCII字符，获取一个字节。
+
+void user::search()
+{
+  cout << "请输入您要查找活动的关键词：" << endl;
+  string idx;
+  cin >> idx;
+  ifstream in("activity.txt");
+  string a, b, c, d, e, f;
+  int flag;
+  do
+  {
+
+    if (in.eof())
+      break;
+    string s;
+    getline(in, s);
+    istringstream sin(s);
+    flag = 1;
+    sin >> a >> b >> c >> d >> e >> f;
+
+    transform1 A;
+    if (A.include(a, idx))
+    {
+      cout << "活动名称：" << a << "   "
+           << "活动创办人：" << b << "   "
+           << "活动开始时间：" << d << "   "
+           << "活动截止报名时间" << e << "   "
+           << "参与人数:" << f << "/" << c << endl;
+      cout << "************************************************************************************************\n";
+    }
+
+  } while (!in.eof());
+  in.close();
+}
+
+void user::show_final()
+{
+  system("cls");
+  cout << "------------------------------------------------下列活动报名已截止，详情如下：--------------------------------------------" << endl;
+  ifstream in("activity.txt");
+  string a, b, c, d, e, f;
+  string s;
+  getline(in, s);
+
+  do
+  {
+    if (in.eof()) //文件尾就结束
+      break;
+
+    string s;
+    getline(in, s);       //读入每一行
+    istringstream sin(s); //定义sin流
+    sin >> a >> b >> c >> d >> e>>f;
+    if (e < getCurrentSystemTime())
+    {
+      cout << "活动名称：" << a << "   "
+           << "活动创办人：" << b << "   "
+           << "活动开始时间：" << d << "   "
+           << "报名人数" << f << "/" << c << endl;
+      cout << "参与人员有：" << endl;
+      ifstream filein("user1.txt");
+      do
+      {
+        if (filein.eof()) //文件尾就结束
+          break;
+         string s;
+         getline(filein,s);
+         istringstream sin1(s);
+          string name;
+          sin1>>name;
+          string name1;
+          while(sin1>>name1)
+          {
+            if(name1==a)
+            {
+              cout<<name<<" ";
+              break;
+            }
+          }
+      } while (!filein.eof());
+      filein.close();
+      
+      cout <<endl<< "************************************************************************************************\n";
+    }
+  } while (!in.eof());
+  in.close();
+}
 
 void menu()
 {
