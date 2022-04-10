@@ -411,6 +411,7 @@ void user::delete_()
       string s1;
       string name, founder, st_time, en_time, max_size, now_size;
       int flag = 0;
+      int start1=1;
       while (getline(in, s1)) //读入数据
       {
         istringstream sin(s1); //定义sin流
@@ -422,7 +423,8 @@ void user::delete_()
           continue;
         }
         else
-          out << name << " " << founder << " " << max_size << " " << st_time << " " << en_time << " " << now_size << endl; //未修改
+          if(start1==1)start1=0, out << name << " " << founder << " " << max_size << " " << st_time << " " << en_time << " " << now_size;
+          else out << endl << name << " " << founder << " " << max_size << " " << st_time << " " << en_time << " " << now_size ; //未修改
         out.close();                                                                                                       //关闭文件
       }
       in.close(); //关闭文件
@@ -430,9 +432,11 @@ void user::delete_()
       ifstream filein("del.txt");                 //打开文档
       ofstream fileout("activity.txt", ios::out); //副本填充
       string s;
+      int start=1;
       while (getline(filein, s)) //将修改后的内容写到文件中去
       {
-        fileout << s << endl;
+        if(start==1) fileout<<s,start=0;
+         else fileout << endl<< s ;
       }
       filein.close();  //关闭文件
       fileout.close(); //关闭文件
